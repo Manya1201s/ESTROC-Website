@@ -54,7 +54,6 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [activeStage, setActiveStage] = useState(0);
-  const [initialService, setInitialService] = useState("");
   const reducedMotion = useReducedMotion();
   const { theme, toggleTheme } = useTheme();
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -80,8 +79,7 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const scrollToProject = (service?: string) => {
-    if (service) setInitialService(service);
+  const scrollToProject = () => {
     scrollToId("start-a-project");
     setMobileMenuOpen(false);
   };
@@ -154,11 +152,11 @@ export default function Home() {
 
         <Testimonials />
 
-        <section id="start-a-project" className="border-t border-white/[0.08]" data-testid="start-project-section"><div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10 lg:py-28"><div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20"><div><SectionHeading title="START A PROJECT" copy="Have an idea, product or problem you want to build? Tell us what you're working on." /><div className="mt-10 flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600" data-testid="project-form-note"><span className="h-px w-7 bg-[#ff5500]" /> Seven steps / one clear brief</div></div><ProjectForm initialService={initialService} /></div></div></section>
+        <section id="start-a-project" className="border-t border-white/[0.08]" data-testid="start-project-section"><div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10 lg:py-28"><div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20"><div><SectionHeading title="START A PROJECT" copy="Have an idea, product or problem you want to build? Tell us what you're working on." /><div className="mt-10 flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-600" data-testid="project-form-note"><span className="h-px w-7 bg-[#ff5500]" /> Share your details / we'll take it from there</div></div><ProjectForm /></div></div></section>
       </main>
 
       <footer id="about" className="border-t border-white/[0.08]" data-testid="site-footer"><div className="mx-auto max-w-7xl px-5 pb-8 pt-20 sm:px-8 lg:px-10"><div className="grid gap-12 border-b border-white/10 pb-16 lg:grid-cols-[1.5fr_0.8fr_0.8fr_0.7fr]"><div><p className="text-2xl font-bold tracking-[-0.07em] text-zinc-100" data-testid="footer-logo">ESTROC<span className="text-[#ff5500]">.</span></p><p className="mt-6 max-w-sm text-sm leading-relaxed text-zinc-500" data-testid="footer-description">ESTROC builds digital products, custom software and AI-powered solutions for businesses, startups and founders.</p><p className="mt-10 max-w-sm text-xs leading-relaxed text-zinc-600" data-testid="footer-about-copy">ESTROC is a technology studio focused on building modern digital products, software and AI solutions. We work with ideas at different stages — from early concepts and MVPs to existing products that need to evolve.</p></div><FooterColumn title="Navigation" links={[["Work", "work"], ["What we build", "build"], ["Why ESTROC", "why"], ["How we work", "process"], ["About", "about"], ["Contact", "start-a-project"]]} onNavigate={scrollTo} testId="footer-navigation" /><FooterColumn title="Services" links={[["Web development", "build"], ["Mobile apps", "build"], ["SaaS", "build"], ["Custom software", "build"], ["CRM", "build"], ["AI solutions", "build"], ["Automation", "build"], ["Blockchain", "build"]]} onNavigate={scrollTo} testId="footer-services" /><div><p className="text-[10px] font-mono uppercase tracking-[0.22em] text-zinc-600" data-testid="footer-connect-title">Connect</p><a href="mailto:hello@estroc.com" className="mt-4 block text-sm text-zinc-200 transition-colors hover:text-[#ff5500]" data-testid="footer-email-link">hello@estroc.com</a>{socialLinks.some(([, url]) => url) && <div className="mt-7 space-y-3 text-sm" data-testid="footer-social-links">{socialLinks.filter(([, url]) => url).map(([label, url]) => <a key={label} href={url} target="_blank" rel="noreferrer" className="block text-zinc-400 transition-colors hover:text-[#ff5500]" data-testid={`footer-${label.toLowerCase()}-link`}>{label}</a>)}</div>}</div></div><div className="flex flex-col gap-4 pt-7 text-[10px] font-mono uppercase tracking-[0.16em] text-zinc-600 sm:flex-row sm:items-center sm:justify-between"><div className="flex gap-6">{legalLinks.map(([label, url]) => url ? <a key={label} href={url} className="transition-colors hover:text-zinc-300" data-testid={`footer-${label.split(" ")[0].toLowerCase()}-link`}>{label}</a> : <span key={label} data-testid={`footer-${label.split(" ")[0].toLowerCase()}-text`}>{label}</span>)}</div><p data-testid="footer-copyright">© {new Date().getFullYear()} ESTROC. All rights reserved.</p></div><FooterWordmark /></div></footer>
-      <Chatbot onStartProject={scrollToProject} />
+      <Chatbot />
     </div>
   );
 }

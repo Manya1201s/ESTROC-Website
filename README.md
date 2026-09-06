@@ -4,7 +4,7 @@ Portfolio site for ESTROC. React 19 + Vite + Tailwind v4, single page.
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+npm run dev        # http://localhost:3001
 npm run build      # tsc -b && vite build
 ```
 

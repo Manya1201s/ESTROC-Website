@@ -1,7 +1,6 @@
 import type { ProjectFormValues } from "@/components/estroc/ProjectForm";
 
-/** Where enquiries land. Any endpoint that accepts a JSON POST works. */
-const ENDPOINT = import.meta.env.VITE_ENQUIRY_ENDPOINT as string | undefined;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8000";
 export const ENQUIRY_EMAIL = "hello@estroc.com";
 
 export type SubmitResult = { ok: true; via: "endpoint" | "email" } | { ok: false; error: string };
@@ -27,26 +26,23 @@ function asPlainText(form: ProjectFormValues) {
 }
 
 /**
- * Posts the brief to the configured endpoint. With no endpoint set the brief is
- * handed to the visitor's mail client instead — a seven-step form that silently
- * discards the answer is worse than one that makes the visitor press send.
+ * Posts the brief to the backend, which emails it to the studio inbox. If the
+ * backend is unreachable, the brief is handed to the visitor's mail client
+ * instead — a form that silently discards the answer is worse than one that
+ * makes the visitor press send.
  */
 export async function submitEnquiry(form: ProjectFormValues): Promise<SubmitResult> {
-  if (ENDPOINT) {
-    try {
-      const response = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, submittedAt: new Date().toISOString(), source: "estroc.com" }),
-      });
-      if (!response.ok) return { ok: false, error: `The form service replied ${response.status}.` };
-      return { ok: true, via: "endpoint" };
-    } catch {
-      return { ok: false, error: "Could not reach the form service. Check your connection and try again." };
-    }
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/enquiry`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    if (!response.ok) throw new Error(`The mail service replied ${response.status}.`);
+    return { ok: true, via: "endpoint" };
+  } catch {
+    const subject = `New project enquiry — ${form.fullName}${form.company ? ` (${form.company})` : ""}`;
+    window.location.href = `mailto:${ENQUIRY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(asPlainText(form))}`;
+    return { ok: true, via: "email" };
   }
-
-  const subject = `New project enquiry — ${form.fullName}${form.company ? ` (${form.company})` : ""}`;
-  window.location.href = `mailto:${ENQUIRY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(asPlainText(form))}`;
-  return { ok: true, via: "email" };
 }
