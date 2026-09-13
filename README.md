@@ -17,11 +17,11 @@ Each of these is a single constant — no other file needs touching.
 | Where the project form sends leads | `VITE_ENQUIRY_ENDPOINT` in `.env` (see `.env.example`) |
 | Social handles | `socialLinks` in `src/pages/Home.tsx` |
 | Client testimonials | `testimonials` in `src/components/estroc/Testimonials.tsx` |
-| TRUESIGN MEDIA project URL | `projects` in `src/components/estroc/WorkSection.tsx` |
+| Projects in the work section and hero console | `projects` in `src/lib/projects.ts` (each needs a 1.15:1 screenshot in `public/work/`) |
 
 **The enquiry form.** With `VITE_ENQUIRY_ENDPOINT` set, the brief is POSTed there as
 JSON. With it unset, the form falls back to opening the visitor's mail client with
-the brief pre-filled, addressed to `hello@estroc.com` — so leads land somewhere
+the brief pre-filled, addressed to `hello@estroc.co.in` — so leads land somewhere
 either way. Any service taking a JSON POST works (Formspree, Web3Forms, an Apps
 Script, your own API).
 

@@ -9,6 +9,8 @@ import { motion, useMotionValue, useSpring } from "motion/react";
 export default function Cursor() {
   const [enabled, setEnabled] = useState(false);
   const [hovering, setHovering] = useState(false);
+  /** Set from data-cursor on whatever is under the pointer, e.g. "View". */
+  const [label, setLabel] = useState("");
   const [pressed, setPressed] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -26,13 +28,22 @@ export default function Cursor() {
   useEffect(() => {
     if (!enabled) return;
 
-    const INTERACTIVE = 'a, button, input, textarea, select, label, [role="button"], iframe';
+    const INTERACTIVE = 'a, button, input, textarea, select, label, [role="button"]';
 
     const onMove = (event: PointerEvent) => {
       x.set(event.clientX);
       y.set(event.clientY);
+      const target = event.target as Element | null;
+      // Pointer events stop at an iframe's edge, so the ring would freeze there
+      // while the framed site shows its own cursor. Step aside until the
+      // pointer comes back out.
+      if (target?.closest?.("iframe")) {
+        setVisible(false);
+        return;
+      }
       setVisible(true);
-      setHovering(Boolean((event.target as Element | null)?.closest?.(INTERACTIVE)));
+      setHovering(Boolean(target?.closest?.(INTERACTIVE)));
+      setLabel(target?.closest?.("[data-cursor]")?.getAttribute("data-cursor") ?? "");
     };
     const onLeave = () => setVisible(false);
     const onDown = () => setPressed(true);
@@ -63,18 +74,24 @@ export default function Cursor() {
         animate={{ opacity: visible ? 1 : 0 }}
         transition={{ duration: 0.15 }}
       />
+      {/* The ring names what it is over when that element says so, and is a
+          plain ring everywhere else — invisible until it means something. */}
       <motion.div
-        className="absolute rounded-full border border-[#ff5500]/55"
+        className="absolute flex items-center justify-center overflow-hidden rounded-full border border-[#ff5500]/55"
         style={{ x: ringX, y: ringY, translateX: "-50%", translateY: "-50%" }}
         animate={{
-          width: hovering ? 46 : 26,
-          height: hovering ? 46 : 26,
-          opacity: visible ? (hovering ? 0.9 : 0.45) : 0,
+          width: label ? label.length * 8 + 30 : hovering ? 46 : 26,
+          height: label ? 30 : hovering ? 46 : 26,
+          opacity: visible ? (hovering || label ? 0.95 : 0.45) : 0,
           scale: pressed ? 0.82 : 1,
-          backgroundColor: hovering ? "rgba(255,85,0,0.10)" : "rgba(255,85,0,0)",
+          backgroundColor: label ? "rgba(255,85,0,0.95)" : hovering ? "rgba(255,85,0,0.10)" : "rgba(255,85,0,0)",
         }}
         transition={{ type: "spring", stiffness: 420, damping: 30 }}
-      />
+      >
+        {label && (
+          <span className="whitespace-nowrap text-[10px] font-mono uppercase tracking-[0.16em] text-[#0a0a0b]">{label}</span>
+        )}
+      </motion.div>
     </div>
   );
 }

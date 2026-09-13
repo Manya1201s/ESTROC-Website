@@ -1,27 +1,21 @@
 import type { ProjectFormValues } from "@/components/estroc/ProjectForm";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8000";
-export const ENQUIRY_EMAIL = "hello@estroc.com";
+export const ENQUIRY_EMAIL = "hello@estroc.co.in";
 
 export type SubmitResult = { ok: true; via: "endpoint" | "email" } | { ok: false; error: string };
 
 function asPlainText(form: ProjectFormValues) {
   return [
-    `Name:      ${form.fullName}`,
-    `Email:     ${form.email}`,
-    `Company:   ${form.company || "—"}`,
-    `Phone:     ${form.phone || "—"}`,
-    `Services:  ${form.services.join(", ") || "—"}`,
-    `Stage:     ${form.stage || "—"}`,
-    `Budget:    ${form.budget || "—"}`,
-    `Timeline:  ${form.timeline || "—"}`,
-    `Referral:  ${form.referral || "—"}`,
+    `Interested in:  ${form.interests.join(", ") || "—"}`,
+    `Stage:          ${form.stage || "—"}`,
+    `Budget:         ${form.budget || "—"}`,
+    `Name:           ${form.fullName}`,
+    `Email:          ${form.email}`,
+    `Mobile:         ${form.phone || "—"}`,
     "",
-    "Project details",
-    form.details || "—",
-    "",
-    "Additional notes",
-    form.notes || "—",
+    "Message",
+    form.message || "—",
   ].join("\n");
 }
 
@@ -41,7 +35,7 @@ export async function submitEnquiry(form: ProjectFormValues): Promise<SubmitResu
     if (!response.ok) throw new Error(`The mail service replied ${response.status}.`);
     return { ok: true, via: "endpoint" };
   } catch {
-    const subject = `New project enquiry — ${form.fullName}${form.company ? ` (${form.company})` : ""}`;
+    const subject = `New project enquiry — ${form.fullName}`;
     window.location.href = `mailto:${ENQUIRY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(asPlainText(form))}`;
     return { ok: true, via: "email" };
   }

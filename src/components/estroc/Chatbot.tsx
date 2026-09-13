@@ -19,23 +19,31 @@ const greeting: ChatMessage = {
   content: "Hi. What are you looking to build? Tell me a bit about it and I’ll take it from there.",
 };
 
-function normalizeLead(lead: Partial<ProjectFormValues>): ProjectFormValues {
+/** The fields the backend's submit_lead tool can return. */
+interface ChatLead {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  services?: string[];
+  details?: string;
+  stage?: string;
+  budget?: string;
+}
+
+/** Maps the agent's lead onto the same fields the project form sends. */
+function normalizeLead(lead: ChatLead): ProjectFormValues {
   return {
-    fullName: lead.fullName ?? "",
-    email: lead.email ?? "",
-    company: lead.company ?? "",
-    phone: lead.phone ?? "",
-    services: Array.isArray(lead.services) ? lead.services : [],
-    details: lead.details ?? "",
+    interests: Array.isArray(lead.services) ? lead.services : [],
+    message: lead.details ?? "",
     stage: lead.stage ?? "",
     budget: lead.budget ?? "",
-    timeline: lead.timeline ?? "",
-    referral: lead.referral ?? "",
-    notes: lead.notes ?? "",
+    fullName: lead.fullName ?? "",
+    email: lead.email ?? "",
+    phone: lead.phone ?? "",
   };
 }
 
-export default function Chatbot() {
+export default function Chatbot({ hidden = false }: { hidden?: boolean }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([greeting]);
   const [input, setInput] = useState("");
@@ -98,7 +106,7 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 sm:bottom-7 sm:right-7" data-testid="chatbot-widget">
+    <div className={`fixed bottom-5 right-5 z-50 sm:bottom-7 sm:right-7 ${hidden ? "hidden" : ""}`} data-testid="chatbot-widget">
       <AnimatePresence>
         {open && (
           <motion.div
@@ -194,6 +202,7 @@ export default function Chatbot() {
         onClick={() => setOpen((current) => !current)}
         className="ml-auto flex items-center gap-2 border border-white/15 bg-[#111113] px-4 py-3 text-xs font-medium text-zinc-100 shadow-xl shadow-black/30 transition-colors hover:border-[#ff5500]/60 hover:text-[#ff9a6b]"
         aria-label="Open ESTROC AI chatbot"
+        data-cursor="Ask"
         data-testid="chatbot-trigger-button"
       >
         <MessageCircle className="h-4 w-4 text-[#ff5500]" />

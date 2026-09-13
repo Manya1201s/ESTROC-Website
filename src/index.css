@@ -223,6 +223,10 @@ html.light [class~="text-zinc-600"] {
 html.light [class~="text-zinc-700"] {
   color: #a1a1aa;
 }
+/* Unlit states in the engine chain: barely there on either ground. */
+html.light [class~="text-zinc-800"] {
+  color: #c9c9cf;
+}
 html.light [class~="border-white/10"], html.light [class~="border-white/15"], html.light [class~="border-white/20"], html.light [class~="border-white/25"], html.light [class~="border-white/[0.07]"], html.light [class~="border-white/[0.08]"] {
   border-color: rgb(24 24 27 / 12%);
 }
@@ -255,6 +259,10 @@ html.has-custom-cursor,
 html.has-custom-cursor * {
   cursor: none;
 }
+/* Framed sites keep their own cursor, so the frame edge must not hide it. */
+html.has-custom-cursor iframe {
+  cursor: auto;
+}
 
 /* WHY ESTROC rows: an orange wash wipes in from the left on hover, sitting
    behind the text rather than tinting it. */
@@ -275,44 +283,13 @@ html.has-custom-cursor * {
   transform: scaleX(1);
 }
 
-/* Bordered links that fill with brand colour from the bottom up. */
-.wipe-link {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  transition: color 280ms ease, border-color 280ms ease;
-}
-.wipe-link::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  transform: scaleY(0);
-  transform-origin: bottom center;
-  background: #ff5500;
-  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.wipe-link:hover {
-  border-color: #ff5500;
-  color: #0a0a0b;
-}
-.wipe-link:hover::before {
-  transform: scaleY(1);
-}
-
-/* Placeholder tile for projects with no public link yet. */
-.grid-fade {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 12px 12px;
-  mask-image: radial-gradient(circle at center, #000 30%, transparent 72%);
-}
-
 /* Light theme: the deployed build maps dark utilities through attribute
    selectors, so anything new needs its counterpart here too. */
 html.light .reason-wipe {
   background: linear-gradient(90deg, rgba(255, 85, 0, 0.12), rgba(255, 85, 0, 0.03) 65%, transparent);
+}
+html.light [class~="placeholder:text-zinc-600"]::placeholder {
+  color: #a1a1aa;
 }
 html.light [class~="text-zinc-100/[0.07]"] {
   color: rgb(24 24 27 / 8%);
@@ -320,18 +297,8 @@ html.light [class~="text-zinc-100/[0.07]"] {
 html.light [class~="bg-[#0d0d0f]"] {
   background-color: #f0f0ee;
 }
-html.light .grid-fade {
-  background-image:
-    linear-gradient(rgba(24, 24, 27, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(24, 24, 27, 0.1) 1px, transparent 1px);
-}
-html.light .wipe-link:hover {
-  color: #ffffff;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .reason-wipe,
-  .wipe-link::before {
+  .reason-wipe {
     transition: none;
   }
 }

@@ -1,0 +1,13 @@
+{
+  "name": "ESTROC",
+  "short_name": "ESTROC",
+  "description": "ESTROC builds digital products, custom software and AI-powered solutions for businesses, startups and founders.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+  ]
+}

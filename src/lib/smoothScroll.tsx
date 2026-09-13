@@ -40,6 +40,11 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
   return <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>;
 }
 
+/** The running Lenis instance, or null when smooth scrolling is off. */
+export function useLenis() {
+  return useContext(LenisContext);
+}
+
 export function useScrollTo() {
   const lenis = useContext(LenisContext);
 
