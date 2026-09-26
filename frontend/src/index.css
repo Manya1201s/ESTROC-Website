@@ -1,0 +1,382 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/outfit";
+@import "@fontsource-variable/jetbrains-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: #0a0a0b;
+  --foreground: #f5f5f7;
+  --card: #121215;
+  --card-foreground: #f5f5f7;
+  --popover: #121215;
+  --popover-foreground: #f5f5f7;
+  --primary: #ff5500;
+  --primary-foreground: #0a0a0b;
+  --secondary: #18181b;
+  --secondary-foreground: #f5f5f7;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --accent: #18181b;
+  --accent-foreground: #f5f5f7;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #ff5500;
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+.dark {
+  --background: #0a0a0b;
+  --foreground: #f5f5f7;
+  --card: #121215;
+  --card-foreground: #f5f5f7;
+  --popover: #121215;
+  --popover-foreground: #f5f5f7;
+  --primary: #ff5500;
+  --primary-foreground: #0a0a0b;
+  --secondary: #18181b;
+  --secondary-foreground: #f5f5f7;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --accent: #18181b;
+  --accent-foreground: #f5f5f7;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #ff5500;
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+.light {
+  --background: #f7f7f5;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #ff5500;
+  --primary-foreground: #ffffff;
+  --secondary: #ececea;
+  --secondary-foreground: #18181b;
+  --muted: #ececea;
+  --muted-foreground: #52525b;
+  --accent: #ececea;
+  --accent-foreground: #18181b;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: rgba(24, 24, 27, 0.14);
+  --input: rgba(24, 24, 27, 0.16);
+  --ring: #ff5500;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+    @supports (color: color-mix(in lab, red, red)) {
+      outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    }
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  html {
+    font-family: 'Outfit Variable', sans-serif;
+    scroll-behavior: smooth;
+    background: var(--background);
+  }
+  body {
+    min-width: 320px;
+    background: var(--background);
+  }
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection {
+    background: #ff5500;
+    color: #0a0a0b;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .theme-changing *, .theme-changing *::before, .theme-changing *::after {
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+.theme-toggle {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  @supports (color: color-mix(in lab, red, red)) {
+    background: color-mix(in srgb, var(--card) 74%, transparent);
+  }
+  color: var(--foreground);
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+.theme-toggle:hover {
+  border-color: rgba(255, 85, 0, 0.65);
+  color: #ff5500;
+  transform: translateY(-1px);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid #ff5500;
+  outline-offset: 3px;
+}
+html.light, html.light body {
+  background: #f7f7f5 !important;
+  color: #18181b;
+}
+html.light [class~="bg-[#0a0a0b]"] {
+  background-color: #f7f7f5;
+}
+html.light [class~="bg-[#0a0a0b]/80"] {
+  background-color: rgb(247 247 245 / 88%);
+}
+html.light [class~="bg-[#111113]"] {
+  background-color: #ffffff;
+}
+html.light [class~="bg-[#18181b]"] {
+  background-color: #efefec;
+}
+html.light [class~="bg-[#0d0d0f]"] {
+  background-color: #f3f3f0;
+}
+html.light [class~="text-[#f5f5f7]"], html.light [class~="text-zinc-100"] {
+  color: #18181b;
+}
+html.light [class~="text-zinc-200"] {
+  color: #27272a;
+}
+html.light [class~="text-zinc-300"] {
+  color: #3f3f46;
+}
+html.light [class~="text-zinc-400"] {
+  color: #52525b;
+}
+html.light [class~="text-zinc-500"] {
+  color: #71717a;
+}
+html.light [class~="text-zinc-600"] {
+  color: #85858e;
+}
+html.light [class~="text-zinc-700"] {
+  color: #a1a1aa;
+}
+/* Unlit states in the engine chain: barely there on either ground. */
+html.light [class~="text-zinc-800"] {
+  color: #c9c9cf;
+}
+html.light [class~="border-white/10"], html.light [class~="border-white/15"], html.light [class~="border-white/20"], html.light [class~="border-white/25"], html.light [class~="border-white/[0.07]"], html.light [class~="border-white/[0.08]"] {
+  border-color: rgb(24 24 27 / 12%);
+}
+html.light [class~="bg-white/10"], html.light [class~="bg-white/[0.02]"] {
+  background-color: rgb(24 24 27 / 7%);
+}
+html.light [class~="hover:bg-white/10"]:hover {
+  background-color: rgb(24 24 27 / 7%);
+}
+html.light [class~="hover:text-zinc-100"]:hover {
+  color: #18181b;
+}
+html.light [class~="hover:text-zinc-200"]:hover, html.light [class~="hover:text-zinc-300"]:hover {
+  color: #27272a;
+}
+html.light [class~="shadow-black/30"], html.light [class~="shadow-black/50"] {
+  --tw-shadow-color: rgb(24 24 27 / 12%);
+}
+.theme-changing *, .theme-changing *::before, .theme-changing *::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow !important;
+  transition-duration: 320ms !important;
+  transition-timing-function: ease !important;
+}
+
+/* ── Motion layer ─────────────────────────────────────────────── */
+
+/* WHY ESTROC rows: an orange wash wipes in from the left on hover, sitting
+   behind the text rather than tinting it. */
+.reason-row {
+  isolation: isolate;
+}
+.reason-wipe {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(255, 85, 0, 0.14), rgba(255, 85, 0, 0.03) 65%, transparent);
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reason-row:hover .reason-wipe,
+.reason-row:focus-within .reason-wipe {
+  transform: scaleX(1);
+}
+
+/* Light theme: the deployed build maps dark utilities through attribute
+   selectors, so anything new needs its counterpart here too. */
+html.light .reason-wipe {
+  background: linear-gradient(90deg, rgba(255, 85, 0, 0.12), rgba(255, 85, 0, 0.03) 65%, transparent);
+}
+html.light [class~="placeholder:text-zinc-600"]::placeholder {
+  color: #a1a1aa;
+}
+html.light [class~="text-zinc-100/[0.07]"] {
+  color: rgb(24 24 27 / 8%);
+}
+html.light [class~="bg-[#0d0d0f]"] {
+  background-color: #f0f0ee;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reason-wipe {
+    transition: none;
+  }
+}
+
+/* Terminal caret for the hero build console. */
+.console-caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: text-bottom;
+  background: #ff5500;
+  animation: console-blink 1s steps(2, start) infinite;
+}
+@keyframes console-blink {
+  to { visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .console-caret { animation: none; }
+}
+
+/* ── Services marquee ─────────────────────────────────────────── */
+
+.marquee {
+  /* Feathered edges so words enter and leave instead of being guillotined. */
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  cursor: pointer;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-drift 42s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-visible .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-run {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.marquee-item {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+  padding-right: clamp(2.5rem, 6vw, 6rem);
+  font-size: clamp(1.5rem, 3.1vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  word-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--foreground);
+  transition: color 260ms ease;
+}
+/* The second half is hollow orange, so the line reads as a chant rather than
+   one long block of text. */
+.marquee-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px #ff5500;
+}
+/* The band dims on hover and each word lifts back out as you pass it, which
+   reads as a list you can scan rather than a strip of decoration. */
+.marquee:hover .marquee-item {
+  color: color-mix(in srgb, var(--foreground) 38%, transparent);
+}
+.marquee:hover .marquee-item:hover {
+  color: #ff5500;
+}
+
+@keyframes marquee-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    overflow-x: auto;
+    cursor: default;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  /* Without motion the echo is pure duplication, so drop it entirely. */
+  .marquee-run[aria-hidden="true"] {
+    display: none;
+  }
+}

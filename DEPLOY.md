@@ -2,7 +2,7 @@
 
 Both the React frontend and the FastAPI backend ship in **one Docker image**
 and run as **one AWS App Runner service**. The `Dockerfile` at the repo root
-builds the frontend (`npm run build`) in one stage, then copies the result
+builds `frontend/` (`npm run build`) in one stage, then copies the result
 into the Python backend image, which serves it — see the block at the bottom
 of [backend/main.py](backend/main.py). Same origin for both, so there's no
 CORS to configure between them in production.
@@ -32,7 +32,7 @@ aws ecr create-repository --repository-name estroc-app --region ap-south-1
 aws ecr get-login-password --region ap-south-1 \
   | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
 
-# build from the repo root (this is the build context — it needs both src/ and backend/)
+# build from the repo root (this is the build context — it needs both frontend/ and backend/)
 docker build -t estroc-app .
 
 # tag and push
@@ -63,7 +63,7 @@ Console: **App Runner → Create service**
 
   Create a secret: `aws secretsmanager create-secret --name estroc/openai-api-key --secret-string "<key>"`,
   then in App Runner's env var value pick "Secrets Manager" and select it.
-  **The local `.env` has a live OpenAI key and Gmail app password in it —
+  **The local `backend/.env` has a live OpenAI key and Gmail app password in it —
   rotate both if this repo or `.env` has ever been shared outside your
   machine.**
 
@@ -102,9 +102,9 @@ Frontend and backend still run separately for dev — this Docker setup is only
 for the production build:
 
 ```bash
-npm run dev                                    # frontend on :3001
-uvicorn main:app --reload --app-dir backend    # backend on :8000
+cd frontend && npm run dev                  # frontend on :3001
+cd backend && uvicorn main:app --reload     # backend on :8000
 ```
 
-`VITE_API_BASE_URL` in your local `.env` should point at
+`VITE_API_BASE_URL` in `frontend/.env` should point at
 `http://localhost:8000` for this (already the default if unset).

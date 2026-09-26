@@ -2,10 +2,10 @@
 FROM node:20-slim AS frontend-build
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
-COPY . .
+COPY frontend/ .
 
 # Empty base URL bakes relative /api/... calls into the bundle, so the built
 # frontend calls whatever origin it's served from — no CORS needed in prod

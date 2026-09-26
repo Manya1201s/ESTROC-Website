@@ -7,7 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from openai import OpenAI
 from pydantic import BaseModel, Field
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -58,6 +58,7 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[ChatMessage]
+    visitor: dict[str, str] = Field(default_factory=dict)
 
 
 class EnquiryRequest(BaseModel):
@@ -98,8 +99,9 @@ HOW WE WORK (six-stage process)
 6. Evolve — maintain, monitor and keep improving the product: new features, scale and security as the business grows.
 
 OUR WORK (shipped projects)
+- TRUESIGN MEDIA (formerly Sell Ads) — outdoor advertising / OOH media platform: premium hoardings and billboards across Nagpur, Amravati, Chandrapur and Wardha, with a searchable site catalogue and rate enquiries. Live: https://truesignmedia.com/
 - RAVE LUX — luxury e-commerce / digital product experience. Live: https://ravelux-app.vercel.app/
-- NewAgeNaukri.online — job / recruitment platform. Live: https://newagenaukri.online/
+- NewAgeNaukri.online — job / recruitment platform. Live: https://newagenaukri.vercel.app/
 - CYBER VAULT — secure backend system. Live: https://cyber-vault.vercel.app/
 - TRUSTLENS — secure intelligence & document verification product. Live: https://trust-lens-one.vercel.app/
 
@@ -119,33 +121,97 @@ Your two jobs, in order of priority:
 Rules:
 - Keep every reply short — two to four sentences, warm and direct, no corporate filler.
 - Ask one or two questions at a time. Never dump a long list of questions at once.
-- Over the course of the conversation, find out: what they're building, their full name, their email (required so the team can follow up), and ideally their company, budget range and timeline.
-- Once you have at least their name, email, and a clear idea of what they want built, call the submit_lead function with everything gathered so far. Do not call it before that.
-- After calling submit_lead, send a short closing message thanking them and letting them know the team will follow up.
+- The visitor has already provided their basic contact details before entering the project discussion.
+- Their name, email, phone number and company are supplied separately as visitor context.
+- Do not ask again for their name, email or phone number unless they explicitly want to change them.
+- Focus the conversation on understanding their project.
+- Find out what they want to build, their requirements, relevant services, current project stage, budget range and timeline where appropriate.
+- Ask only one or two questions at a time. Do not dump a long list of questions.
+- Do not call submit_lead immediately after receiving the visitor's contact details.
+- Continue the project discussion until you have a clear understanding of what the visitor wants to build.
+- Once you have enough useful project information, call the submit_lead function with the visitor's contact details and the project information gathered during the conversation.
+- The visitor's phone number must be included in the lead.
+- After calling submit_lead, send a short closing message thanking the visitor and letting them know the ESTROC team will follow up.
 - If a question is outside what you know about ESTROC, say so plainly and point them to hello@estroc.co.in rather than guessing."""
+
 
 SUBMIT_LEAD_TOOL = {
     "type": "function",
     "function": {
         "name": "submit_lead",
-        "description": "Call once enough information has been gathered about the visitor's project to hand off to the ESTROC team.",
+        "description": (
+            "Call this function only after enough information has been gathered "
+            "about the visitor's project. Submit the visitor's contact details "
+            "together with the project brief to the ESTROC team."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
-                "fullName": {"type": "string"},
-                "email": {"type": "string"},
-                "company": {"type": "string"},
-                "phone": {"type": "string"},
-                "services": {"type": "array", "items": {"type": "string"}},
-                "details": {"type": "string"},
-                "stage": {"type": "string"},
-                "budget": {"type": "string"},
-                "timeline": {"type": "string"},
-                "notes": {"type": "string"},
+                "fullName": {
+                    "type": "string",
+                    "description": "Visitor's full name."
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Visitor's email address."
+                },
+                "phone": {
+                    "type": "string",
+                    "description": "Visitor's phone number."
+                },
+                "company": {
+                    "type": "string",
+                    "description": "Visitor's company or organisation, if provided."
+                },
+                "services": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": (
+                        "ESTROC services relevant to the visitor's project, "
+                        "for example website development, mobile app development, "
+                        "SaaS, AI, custom software, automation, etc."
+                    )
+                },
+                "details": {
+                    "type": "string",
+                    "description": (
+                        "A clear summary of what the visitor wants to build, "
+                        "including important requirements discussed."
+                    )
+                },
+                "stage": {
+                    "type": "string",
+                    "description": (
+                        "Current stage of the project, such as idea, planning, "
+                        "MVP, existing product, redesign, or scaling."
+                    )
+                },
+                "budget": {
+                    "type": "string",
+                    "description": "Budget range mentioned by the visitor, if any."
+                },
+                "timeline": {
+                    "type": "string",
+                    "description": "Expected or desired project timeline, if mentioned."
+                },
+                "notes": {
+                    "type": "string",
+                    "description": (
+                        "Any additional useful information from the project discussion."
+                    )
+                }
             },
-            "required": ["fullName", "email", "services", "details"],
-        },
-    },
+            "required": [
+                "fullName",
+                "email",
+                "phone",
+                "services",
+                "details"
+            ]
+        }
+    }
 }
 
 
@@ -202,42 +268,106 @@ def enquiry(request: Request, form: EnquiryRequest):
     return {"ok": True}
 
 
+def sse(event: dict) -> str:
+    """One server-sent event. The widget reads these as they land."""
+    return f"data: {json.dumps(event)}\n\n"
+
+
+def chat_events(payload: ChatRequest):
+    """Streams the model's answer as it is generated.
+
+    The whole reply used to be awaited before anything reached the visitor,
+    which read as a long dead pause in the widget. Text now goes out token by
+    token; the submit_lead tool call can't be — its arguments arrive as JSON
+    fragments — so those are accumulated and sent as one `lead` event at the end,
+    which is also where the frontend fires the enquiry email.
+    """
+    tool_names: dict[int, str] = {}
+    tool_args: dict[int, str] = {}
+    streamed_any_text = False
+
+    try:
+        stream = client.chat.completions.create(
+            model="gpt-5-nano",
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}]
+            + [message.model_dump() for message in payload.messages],
+            tools=[SUBMIT_LEAD_TOOL],
+            tool_choice="auto",
+            stream=True,
+            # gpt-5-nano is a reasoning model: on the default ("medium") effort
+            # it thinks for ~12s before the first token, while the answer itself
+            # takes under half a second to generate. This is an intake chat with
+            # a short, well-specified script — it doesn't need that budget.
+            # Measured: ~12.0s to first token on medium, ~4.0s on low.
+            # extra_body because the pinned openai SDK (1.57.4) predates the
+            # typed parameter; it becomes reasoning_effort="low" after an upgrade.
+            extra_body={"reasoning_effort": "low"},
+        )
+
+        for chunk in stream:
+            if not chunk.choices:
+                continue
+            delta = chunk.choices[0].delta
+
+            if delta.content:
+                streamed_any_text = True
+                yield sse({"type": "delta", "text": delta.content})
+
+            for call in delta.tool_calls or []:
+                if call.function is None:
+                    continue
+                if call.function.name:
+                    tool_names[call.index] = call.function.name
+                if call.function.arguments:
+                    tool_args[call.index] = tool_args.get(call.index, "") + call.function.arguments
+    except Exception as exc:
+        print(f"OpenAI chat error: {exc!r}")
+        yield sse({"type": "error", "error": "The AI agent is unavailable right now. Please try again."})
+        return
+
+    lead = None
+    for index, name in tool_names.items():
+        if name == "submit_lead":
+            try:
+                lead = json.loads(tool_args.get(index, ""))
+            except json.JSONDecodeError:
+                lead = None
+            break
+
+    if not streamed_any_text:
+        # The model answered with the tool call alone (or with nothing at all).
+        yield sse(
+            {
+                "type": "delta",
+                "text": "Thanks — I've got everything I need. The team will be in touch shortly."
+                if lead
+                else "…",
+            }
+        )
+
+    if lead:
+        yield sse({"type": "lead", "lead": lead})
+
+    yield sse({"type": "done"})
+
+
 @app.post("/api/chat")
 @limiter.limit("10/minute")
 def chat(request: Request, payload: ChatRequest):
     if client is None:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY is not configured on the server.")
 
-    try:
-        completion = client.chat.completions.create(
-            model="gpt-5-nano",
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}]
-            + [message.model_dump() for message in payload.messages],
-            tools=[SUBMIT_LEAD_TOOL],
-            tool_choice="auto",
-        )
-    except Exception as exc:
-        print(f"OpenAI chat error: {exc!r}")
-        raise HTTPException(
-            status_code=500, detail="The AI agent is unavailable right now. Please try again."
-        ) from exc
-
-    choice = completion.choices[0]
-    tool_calls = choice.message.tool_calls or []
-    submit_call = next((call for call in tool_calls if call.function.name == "submit_lead"), None)
-
-    if submit_call:
-        try:
-            lead = json.loads(submit_call.function.arguments)
-        except json.JSONDecodeError:
-            lead = None
-        return {
-            "reply": choice.message.content
-            or "Thanks — I've got everything I need. The team will be in touch shortly.",
-            "lead": lead,
-        }
-
-    return {"reply": choice.message.content or ""}
+    return StreamingResponse(
+        chat_events(payload),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            # Stops nginx/App Runner style proxies buffering the whole response
+            # and undoing the streaming.
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # The Docker image builds the frontend into ./static (see Dockerfile) so this
